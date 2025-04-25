@@ -3,6 +3,7 @@ package github
 import (
 	"errors"
 	"fmt"
+	"math"
 
 	"github.com/google/go-github/v69/github"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -96,6 +97,29 @@ func RequiredInt(r mcp.CallToolRequest, p string) (int, error) {
 		return 0, err
 	}
 	return int(v), nil
+}
+
+// RequiredInt32 retrieves a required parameter from the request and ensures it is a valid int32.
+// It performs the following checks:
+// 1. The parameter is present.
+// 2. The parameter is a float64 (as expected).
+// 3. The value is within the int32 range.
+// 4. The value is an integer (no fractional part).
+func RequiredInt32(r mcp.CallToolRequest, p string) (int32, error) {
+	v, err := requiredParam[float64](r, p)
+	if err != nil {
+		return 0, err
+	}
+
+	if v != float64(int64(v)) {
+		return 0, fmt.Errorf("parameter %q must be an integer, got %v", p, v)
+	}
+
+	if v < math.MinInt32 || v > math.MaxInt32 {
+		return 0, fmt.Errorf("parameter %q is out of int32 range", p)
+	}
+
+	return int32(v), nil
 }
 
 // OptionalParam is a helper function that can be used to fetch a requested parameter from the request.
