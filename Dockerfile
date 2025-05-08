@@ -17,10 +17,13 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     -o /bin/github-mcp-server cmd/github-mcp-server/main.go
 
 # Make a stage to run the app
-FROM gcr.io/distroless/base-debian12
+FROM alpine:latest
 # Set the working directory
 WORKDIR /server
 # Copy the binary from the build stage
 COPY --from=build /bin/github-mcp-server .
+# Ensure the binary is executable
+RUN chmod +x /server/github-mcp-server
 # Command to run the server
-CMD ["./github-mcp-server", "stdio"]
+ENTRYPOINT ["/server/github-mcp-server"]
+CMD ["stdio"]
